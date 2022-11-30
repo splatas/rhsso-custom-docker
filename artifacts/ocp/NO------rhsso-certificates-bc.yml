@@ -1,0 +1,48 @@
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  annotations:
+    openshift.io/generated-by: OpenShiftNewBuild
+  labels:
+    build: rhsso-certificates
+  name: rhsso-certificates
+spec:
+  failedBuildsHistoryLimit: 5
+  nodeSelector: null
+  output:
+    to:
+      kind: ImageStreamTag
+      name: rhsso-certificates:latest
+  postCommit: {}
+  resources: {}
+  runPolicy: Serial
+  source:
+    binary: {}
+    type: Binary
+  strategy:
+    dockerStrategy:
+      env:
+      - name: PLUGIN_URL
+        valueFrom:
+          configMapKeyRef:
+            key: PLUGIN_URL
+            name: plugin-properties
+      - name: PLUGIN_USER
+        valueFrom:
+          secretKeyRef:
+            key: user
+            name: pluging-credentials
+      - name: PLUGIN_PASSWORD
+        valueFrom:
+          secretKeyRef:
+            key: password
+            name: pluging-credentials
+    type: Docker
+  successfulBuildsHistoryLimit: 5
+  triggers:
+  - github:
+      secret: qvTlalzxG2MAYM9AHs9a
+    type: GitHub
+  - generic:
+      secret: jS-64CaEIZfUweRcp_-U
+    type: Generic

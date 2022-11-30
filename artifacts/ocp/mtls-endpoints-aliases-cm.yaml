@@ -1,0 +1,14 @@
+apiVersion: v1
+data:
+  mtls_custom.json: |
+    {
+        "mtls_endpoint_aliases": 
+        {
+        "endpoints": "Contact with Administrator"
+        }
+    }
+kind: ConfigMap
+metadata:
+#  labels:
+#    app: sso-common
+  name: mtls-endpoints-aliases-cm

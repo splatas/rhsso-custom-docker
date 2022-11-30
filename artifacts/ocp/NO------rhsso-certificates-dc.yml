@@ -1,0 +1,137 @@
+apiVersion: apps.openshift.io/v1
+kind: DeploymentConfig
+metadata:
+  annotations:
+    openshift.io/generated-by: OpenShiftNewApp
+  labels:
+    app: sso75-ocp4-x509-https
+    application: sso-certificate
+    rhsso: 7.5.2.GA
+    template: sso75-ocp4-x509-https
+  name: rhsso-certificate
+spec:
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    deploymentConfig: sso-certificate
+  strategy:
+    activeDeadlineSeconds: 21600
+    recreateParams:
+      timeoutSeconds: 600
+    resources: {}
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        openshift.io/generated-by: OpenShiftNewApp
+      creationTimestamp: null
+      labels:
+        app: sso75-ocp4-x509-https
+        application: sso-certificate
+        deploymentConfig: sso-certificate
+      name: sso-certificate
+    spec:
+      containers:
+      - env:
+        - name: SSO_HOSTNAME
+        - name: DB_MIN_POOL_SIZE
+        - name: DB_MAX_POOL_SIZE
+        - name: DB_TX_ISOLATION
+        - name: JGROUPS_PING_PROTOCOL
+          value: openshift.DNS_PING
+        - name: OPENSHIFT_DNS_PING_SERVICE_NAME
+          value: sso-ping
+        - name: OPENSHIFT_DNS_PING_SERVICE_PORT
+          value: "8888"
+        - name: X509_CA_BUNDLE
+          value: /var/run/configmaps/service-ca/service-ca.crt /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+        - name: JGROUPS_CLUSTER_PASSWORD
+          value: IEBERiVXggKlD8reXcE6gkS64NacMt5W
+        - name: SSO_ADMIN_USERNAME
+          value: admin
+        - name: SSO_ADMIN_PASSWORD
+          value: redhat01
+        - name: SSO_REALM
+        - name: SSO_SERVICE_USERNAME
+        - name: SSO_SERVICE_PASSWORD
+        image: image-registry.openshift-image-registry.svc:5000/openshift/sso75-openshift-rhel8@sha256:2f6da14e49df554116a1268c1d2366a8e75ad6723a1d52b6ca2d2408496c01f1
+        imagePullPolicy: Always
+        livenessProbe:
+          exec:
+            command:
+            - /bin/bash
+            - -c
+            - /opt/eap/bin/livenessProbe.sh
+          failureThreshold: 3
+          initialDelaySeconds: 60
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        name: sso-certificate
+        ports:
+        - containerPort: 8778
+          name: jolokia
+          protocol: TCP
+        - containerPort: 8080
+          name: http
+          protocol: TCP
+        - containerPort: 8443
+          name: https
+          protocol: TCP
+        - containerPort: 8888
+          name: ping
+          protocol: TCP
+        readinessProbe:
+          exec:
+            command:
+            - /bin/bash
+            - -c
+            - /opt/eap/bin/readinessProbe.sh
+          failureThreshold: 3
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        resources:
+          limits:
+            memory: 1Gi
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /etc/x509/https
+          name: sso-x509-https-volume
+          readOnly: true
+        - mountPath: /etc/x509/jgroups
+          name: sso-x509-jgroups-volume
+          readOnly: true
+        - mountPath: /var/run/configmaps/service-ca
+          name: service-ca
+          readOnly: true
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 75
+      volumes:
+      - name: sso-x509-https-volume
+        secret:
+          defaultMode: 420
+          secretName: sso-x509-https-secret
+      - name: sso-x509-jgroups-volume
+        secret:
+          defaultMode: 420
+          secretName: sso-x509-jgroups-secret
+      - configMap:
+          defaultMode: 420
+          name: sso-service-ca
+        name: service-ca
+  test: false
+  triggers:
+  - imageChangeParams:
+      automatic: true
+      containerNames:
+      - sso-certificate
+      from:
+        kind: ImageStreamTag
+        name: rhsso-certificates:latest
+    type: ImageChange
+  - type: ConfigChange
