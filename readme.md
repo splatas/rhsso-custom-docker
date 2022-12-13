@@ -19,17 +19,17 @@ $ oc new-project $SSO_PROJECT
 2) Pararse en la carpeta descargada y ejecutar el build:
 cd /$REPO_GIT
 
-3) Crear Configmap 
+3) Crear Configmap para customizar 'mtls-endpoints_aliases':
 ```
 $ oc create -f ./artifacts/ocp/mtls-endpoints-aliases-cm.yaml
 ```
 
-4) Hacemos backup del BC original:
+4) Creamos el BuildConfig:
 ```
 $ oc new-build --name rhsso --binary --strategy docker
 ```
 
-5) Buildear la imagen:
+5) Buildeamos la imagen con el BC anterior y el contenido de la carpeta actual:
 ```
 $ oc start-build rhsso --from-dir . --follow
 ```
@@ -41,17 +41,34 @@ $ oc create -f ./artifacts/ocp/sso75-ocp4-x509-https.json -n openshift
 ```
 
 
-7) Crear un SSO generico para poder pisar la imagen
+7) Creamos el DeploymentConfig de SSO con el template creado en el paso anterior. Le indicamos User admin (y su Password) que se va a crear, para administrar la instancia de RH-SSO.
 ```
 $ oc new-app --template=sso75-ocp4-x509-https \
         --param=SSO_ADMIN_USERNAME=admin \
         --param=SSO_ADMIN_PASSWORD="redhat01"
 ```
 
-8) Montar el configmap como volumen
+8) Montar el configmap del paso 3 como volumen:
 ```
 $ oc set volume dc/sso --add --name=mtls-endpoints-aliases-cm --mount-path /opt/eap/extensions/mtls_custom.json --sub-path mtls_custom.json --source='{"configMap":{"name":"mtls-endpoints-aliases-cm","items":[{"key":"mtls_custom.json","path":"mtls_custom.json"}]}}' -n $SSO_PROJECT
 ```
+
+9) Actualizo el 'initialDelaySeconds' del livenessProbe para que tenga mas tiempo el primer deploy: lo paso de 60 a 600 segundos.
+```$ oc patch dc sso -p '{"spec":{"template": {"spec": {"containers":[{"name": "sso","livenessProbe": {"initialDelaySeconds":'600'}}]}}}}' -n ${SSO_PROJECT}
+```
+
+10) Si no se desplegó automáticamente, lanzo el despliegue del DC:
+```
+$ oc rollout latest dc/sso
+```
+
+
+11) Valido que el .well-known muestre lo indicado en el ConfigMap (paso 3):
+```
+$ curl -v https://sso-rhsso-dev.apps.cluster-8nh78.8nh78.sandbox2441.opentlc.com/auth/realms/master/.well-known/openid-configuration | grep mtls_endpoint_aliases
+```
+
+
 
 --------------------
 POST CONFIGURACIONES
@@ -66,7 +83,7 @@ POST CONFIGURACIONES
           - sso
         from:
           kind: ImageStreamTag
-          namespace: openshift
+          namespace: openshift  <== $SSO_PROJECT
           name: 'rhsso:latest'
         lastTriggeredImage: >-
        image-registry.openshift-image-registry.svc:5000/rh-sso/rhsso@sha256:3bd57de93a781e1633919dc26e189a665ca28dad20912136851df3fd0f87f156
