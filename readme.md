@@ -9,7 +9,7 @@ Este extracto cubre el proceso de instalación del producto **Red Hat Single Sig
 1) Loguearse al cluster y setear la variable del proyecto:
 oc login --token=sha256~k5i6zv-LQD-uWGPW-NOG12Iu-WMa2tQ-2LMxNg0KHdc --server=https://api.cluster-pzg7b.pzg7b.sandbox1371.opentlc.com:6443
 
-export SSO_PROJECT=santalucia-dev   (<= NAMESPACE)
+export SSO_PROJECT=rhsso-dev   (<= NAMESPACE)
 oc new-project $SSO_PROJECT
 
 2) Pararse en la carpeta descargada y ejecutar el build:
