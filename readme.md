@@ -5,7 +5,7 @@ Este extracto cubre el proceso de instalación del producto **Red Hat Single Sig
 --------------------------------------
 # INSTALAR RH-SSO CUSTOMIZADO DESDE 0.
 # Se aplicará la customización del .well-known para que muestre lo indicado en el ConfigMap: 
-#
+
 
 1) Loguearse al cluster y setear la variable del proyecto:
 
