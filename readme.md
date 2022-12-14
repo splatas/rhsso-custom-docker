@@ -59,7 +59,8 @@ $ oc set volume dc/sso --add --name=mtls-endpoints-aliases-cm --mount-path /opt/
 $ oc patch dc/sso -p '{"spec":{"template": {"spec": {"containers":[{"name": "sso","livenessProbe": {"initialDelaySeconds":'600'}}]}}}}' -n ${SSO_PROJECT}
 ```
 
-10) Actualizo la IMAGEN BASE a utilizar durante el despliegue:
+10) Actualizo la IMAGEN BASE a utilizar durante el despliegue.
+El template indica "namespace": "openshift" y el ImageStreamTag "name": "sso75-openshift-rhel8:7.5".
 ```
 $ oc patch dc/sso -p '{"spec": {
     "triggers": [
