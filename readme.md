@@ -4,7 +4,8 @@ Este extracto cubre el proceso de instalación del producto **Red Hat Single Sig
 
 --------------------------------------
 # INSTALAR RH-SSO CUSTOMIZADO DESDE 0.
-
+# Se aplicará la customización del .well-known para que muestre lo indicado en el ConfigMap: 
+#
 
 1) Loguearse al cluster y setear la variable del proyecto:
 
@@ -54,16 +55,39 @@ $ oc set volume dc/sso --add --name=mtls-endpoints-aliases-cm --mount-path /opt/
 ```
 
 9) Actualizo el 'initialDelaySeconds' del livenessProbe para que tenga mas tiempo el primer deploy: lo paso de 60 a 600 segundos.
-```$ oc patch dc sso -p '{"spec":{"template": {"spec": {"containers":[{"name": "sso","livenessProbe": {"initialDelaySeconds":'600'}}]}}}}' -n ${SSO_PROJECT}
+```
+$ oc patch dc/sso -p '{"spec":{"template": {"spec": {"containers":[{"name": "sso","livenessProbe": {"initialDelaySeconds":'600'}}]}}}}' -n ${SSO_PROJECT}
 ```
 
-10) Si no se desplegó automáticamente, lanzo el despliegue del DC:
+10) Actualizo la IMAGEN BASE a utilizar durante el despliegue:
+```
+$ oc patch dc/sso -p '{"spec": {
+    "triggers": [
+      {
+        "type": "ImageChange",
+        "imageChangeParams": {
+          "automatic": true,
+          "containerNames": [
+            "sso"
+          ],
+          "from": {
+            "kind": "ImageStreamTag",
+            "namespace": "rhsso-dev",
+            "name": "rhsso:latest"
+          }
+        }
+      }
+    ]
+  }
+  }}' -n ${SSO_PROJECT} 
+```
+
+11) Si no se desplegó automáticamente, lanzo el despliegue del DC:
 ```
 $ oc rollout latest dc/sso
 ```
 
-
-11) Valido que el .well-known muestre lo indicado en el ConfigMap (paso 3):
+12) Valido que el .well-known muestre lo indicado en el ConfigMap (paso 3):
 ```
 $ curl -v https://sso-rhsso-dev.apps.cluster-8nh78.8nh78.sandbox2441.opentlc.com/auth/realms/master/.well-known/openid-configuration | grep mtls_endpoint_aliases
 ```
@@ -73,22 +97,25 @@ $ curl -v https://sso-rhsso-dev.apps.cluster-8nh78.8nh78.sandbox2441.opentlc.com
 --------------------
 POST CONFIGURACIONES
 --------------------
-12) Hacer un override del deployment para agregar la imagen nueva:
-    OJO EL NAMESPACE: dice 'openshift' pero puede estar en el NAMESPACE de la instalación.
-    ----------------
-    - type: ImageChange
-      imageChangeParams:
-        automatic: true
-        containerNames:
-          - sso
-        from:
-          kind: ImageStreamTag
-          namespace: openshift  <== $SSO_PROJECT
-          name: 'rhsso:latest'
-        lastTriggeredImage: >-
-       image-registry.openshift-image-registry.svc:5000/rh-sso/rhsso@sha256:3bd57de93a781e1633919dc26e189a665ca28dad20912136851df3fd0f87f156
-    - type: ConfigChange
+A) ------>    HECHO EN EL PASO 10.   <------
+
+  Hacer un override del deployment para agregar la imagen nueva:
+  OJO EL NAMESPACE: dice 'openshift' pero puede estar en el NAMESPACE de la instalación.
+  ----------------
+  - type: ImageChange
+    imageChangeParams:
+      automatic: true
+      containerNames:
+        - sso
+      from:
+        kind: ImageStreamTag
+        namespace: openshift  <== $SSO_PROJECT
+        name: 'rhsso:latest'
+      lastTriggeredImage: >-
+     image-registry.openshift-image-registry.svc:5000/rh-sso/rhsso@sha256:3bd57de93a781e1633919dc26e189a665ca28dad20912136851df3fd0f87f156
+  - type: ConfigChange
 
 
-13) Actualizar los healthchecks
+B)  ------>    HECHO EN EL PASO 9.   <------ 
+Actualizar los healthchecks
 SI ERROR EN PRIMER DEPLOY (TIMEOUT): Actualizar el DC livenessProbe / initialDelaySeconds: 60 => 600 
