@@ -35,10 +35,11 @@ $ oc new-build --name rhsso --binary --strategy docker
 $ oc start-build rhsso --from-dir . --follow
 ```
 
-NOTA: Al buildear la imagen con el comando anterior, se incluye la configuración indicada en ./extensions/actions.cli.
+### NOTA: 
+Al buildear la imagen con el comando anterior, se incluye la configuración indicada en ./extensions/actions.cli.
 En este componente se han configurado las directivas para que RH-SSO (mediante la tool jboss-cli) modifique el subsistema 'well-known' referenciando al archivo 'mtls_custom.json', que es provisto por el ConfigMap creado en el paso 3 (mtls-endpoints-aliases-cm) y se inyectará posteriormente en el paso 8 (oc set volume...):
 
-JBOSS-CLI commands:
+### JBOSS-CLI commands:
 ```
 /subsystem=keycloak-server/spi=well-known:add()
 /subsystem=keycloak-server/spi=well-known/provider="openid-configuration":add(enabled=true, properties={"openid-configuration-override"="${openid-configuration-override:}"})
