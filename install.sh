@@ -18,8 +18,8 @@
 #
 # -----------
 
-export CLUSTER=https://api.cluster-xkpnb.xkpnb.sandbox1381.opentlc.com:6443
-export CLUSTER_TOKEN=sha256~nxG_t8492lj1flreBzjUsMaXpISMofJ2EP_FfFoYDXs
+export CLUSTER=https://$API_CLUSTER_URL:6443
+export CLUSTER_TOKEN=$CLUSTER_LOGIN_TOKEN
 export IMAGE_OUTPUT=rhsso
 export NAMESPACE=$1
 echo "##############################################"
@@ -60,19 +60,19 @@ echo ""
 echo "------------"
 echo " Creo credenciales del repositorio Git" 
 oc create secret -n $NAMESPACE generic gitlab-basic-auth \
-    --from-literal=username=splatas \
-    --from-literal=password=glpat-ozhvqye3E6fwZDYVs1DM \
+    --from-literal=username=$MI_USER \
+    --from-literal=password=$MI_PASSWORD \
     --type=kubernetes.io/basic-auth
 
 oc annotate -n $NAMESPACE secret/gitlab-basic-auth \
-    'build.openshift.io/source-secret-match-uri-1=https://gitlab.consulting.redhat.com/*'
+    'build.openshift.io/source-secret-match-uri-1=https://$URL_DEL_REPO/*'
 
 
 #3. **Generar Imagen Docker**
 echo ""
 echo "------------"
 echo " Creo Imagen Docker" 
-oc -n $NAMESPACE new-build https://gitlab.consulting.redhat.com/splatas/es-giss-docker.git --name $IMAGE_OUTPUT --context-dir=. -lapp=sso -lcustom=sgr
+oc -n $NAMESPACE new-build https://$URL_DEL_REPO/$REPOSITORIO.git --name $IMAGE_OUTPUT --context-dir=. -lapp=sso -lcustom=sgr
 
 
 #4. **Instanciar y/o Deployar Red Hat Single SignOn**
@@ -80,7 +80,7 @@ echo ""
 echo "------------"
 echo " Despliego Red Hat Single SignOn" 
 oc new-app -n $NAMESPACE --template=sso75-ocp4-x509-https-giss \ 
-  --param=SSO_ADMIN_USERNAME=admin --param=SSO_ADMIN_PASSWORD="redhat01" \
+  --param=SSO_ADMIN_USERNAME=$ADMIN_USER --param=SSO_ADMIN_PASSWORD=$ADMIN_PASSWORD \
   --param=IMAGE_STREAM_NAMESPACE=$NAMESPACE --param=CUSTOM_IMAGE=$IMAGE_OUTPUT
 
 
