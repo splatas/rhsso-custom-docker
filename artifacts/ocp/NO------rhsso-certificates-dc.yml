@@ -48,9 +48,9 @@ spec:
         - name: JGROUPS_CLUSTER_PASSWORD
           value: IEBERiVXggKlD8reXcE6gkS64NacMt5W
         - name: SSO_ADMIN_USERNAME
-          value: admin
+          value: $MI_ADMIN_USER
         - name: SSO_ADMIN_PASSWORD
-          value: redhat01
+          value: $MI_ADMIN_PASS
         - name: SSO_REALM
         - name: SSO_SERVICE_USERNAME
         - name: SSO_SERVICE_PASSWORD
