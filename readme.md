@@ -10,7 +10,7 @@ Este extracto cubre el proceso de instalación del producto **Red Hat Single Sig
 1) Loguearse al cluster y setear la variable del proyecto:
 
 ```
-$ oc login --token=sha256~k5i6zv-LQD-uWGPW-NOG12Iu-WMa2tQ-2LMxNg0KHdc --server=https://api.cluster-pzg7b.pzg7b.sandbox1371.opentlc.com:6443
+$ oc login --token=$CLUSTER_TOKEN --server=https://$MINISHIFT_CLUSTER_URL:6443
 ```
 ```
 $ export SSO_PROJECT=rhsso-dev   (<= NAMESPACE)
@@ -100,7 +100,7 @@ $ oc rollout latest dc/sso
 
 12) Valido que el .well-known muestre lo indicado en el ConfigMap (paso 3):
 ```
-$ curl -v https://sso-rhsso-dev.apps.cluster-8nh78.8nh78.sandbox2441.opentlc.com/auth/realms/master/.well-known/openid-configuration | grep mtls_endpoint_aliases
+$ curl -v https://$SSO_ROUTE/auth/realms/master/.well-known/openid-configuration | grep mtls_endpoint_aliases
 ```
 
 
