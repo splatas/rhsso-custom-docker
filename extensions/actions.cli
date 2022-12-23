@@ -3,8 +3,8 @@ embed-server --std-out=echo --server-config=standalone-openshift.xml
 batch
 #
 # set DB_DRIVER_NAME=oracle
-# set DB_USERNAME=rhsso
-# set DB_PASSWORD=redhat01
+# set DB_USERNAME=$MI_DB_USERNAME
+# set DB_PASSWORD=$MI_DB_PASSWORD
 # set DB_DRIVER=oracle.jdbc.OracleDriver
 # set DB_XA_DRIVER=oracle.jdbc.xa.client.OracleXADataSource
 # set DB_JDBC_URL=jdbc:oracle:thin:@95.216.145.227:1521/XE
