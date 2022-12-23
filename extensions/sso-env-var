@@ -1,5 +1,5 @@
 Acceso a Oracle Desarrollo:
 usuario: SYS
-clave: redhat01
+clave: $MI_CLAVE
 host:95.216.145.227
 servicio: XE
