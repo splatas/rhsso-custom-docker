@@ -116,7 +116,7 @@ $ oc patch dc/sso -p '{"spec": {
           ],
           "from": {
             "kind": "ImageStreamTag",
-            "namespace": "rhsso-dev",
+            "namespace": "rhn-gps-splatas-dev",
             "name": "rhsso:latest"
           }
         }
