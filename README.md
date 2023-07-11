@@ -37,7 +37,7 @@ $ oc create -f ./artifacts/database/sso-database-cm.yaml
 
 3) Create a Secret to set the Database credentials 'sso-database-secret':
 ```
-$ oc create -f ./artifacts/database/sso-database-cm.yaml
+$ oc create -f ./artifacts/database/sso-database-secret.yaml
 ```
 
 4) Create the BuildConfig:
