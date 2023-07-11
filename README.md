@@ -78,7 +78,7 @@ Custom values will be inyected using the ConfigMap(DB_JDBC_URL) and Secret(DB_US
 )
 ```
 
-6) -PENDING- Import the RH-SSO 7.6 (if not present on cluster):
+6) Import the RH-SSO 7.6 (if not present on cluster):
 https://github.com/jboss-container-images/redhat-sso-7-openshift-image/blob/sso76-dev/docs/templates/reencrypt/ocp-4.x/sso76-ocp4-x509-https.adoc
 ```
 $ oc create -f ./artifacts/ocp/sso76-ocp4-x509-https.json -n openshift
@@ -97,13 +97,13 @@ $ oc new-app --template=sso76-ocp4-x509-https \
 $ oc set volume dc/sso --add --name=mtls-endpoints-aliases-cm --mount-path /opt/eap/extensions/mtls_custom.json --sub-path mtls_custom.json --source='{"configMap":{"name":"mtls-endpoints-aliases-cm","items":[{"key":"mtls_custom.json","path":"mtls_custom.json"}]}}' -n $SSO_PROJECT
 ```
 
-9) --PENDING-- Actualizo el 'initialDelaySeconds' del livenessProbe para que tenga mas tiempo el primer deploy: lo paso de 60 a 600 segundos.
+9) --NOT NECESARY-- Actualizo el 'initialDelaySeconds' del livenessProbe para que tenga mas tiempo el primer deploy: lo paso de 60 a 600 segundos.
 ```
 $ oc patch dc/sso -p '{"spec":{"template": {"spec": {"containers":[{"name": "sso","livenessProbe": {"initialDelaySeconds":'600'}}]}}}}' -n ${SSO_PROJECT}
 ```
 
 10) --PENDING-- Actualizo la IMAGEN BASE a utilizar durante el despliegue.
-El template indica "namespace": "openshift" y el ImageStreamTag "name": "sso75-openshift-rhel8:7.5".
+The original template shows "namespace": "openshift" and ImageStreamTag "name": "sso76-openshift-rhel8:7.6-24".
 ```
 $ oc patch dc/sso -p '{"spec": {
     "triggers": [
@@ -123,7 +123,7 @@ $ oc patch dc/sso -p '{"spec": {
       }
     ]
   }
-  }}' -n ${SSO_PROJECT} 
+  }' -n $SSO_PROJECT
 ```
 
 11) --PENDING-- Si no se desplegó automáticamente, lanzo el despliegue del DC:
