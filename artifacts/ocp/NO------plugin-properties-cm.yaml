@@ -1,6 +1,0 @@
-apiVersion: v1
-data:
-  PLUGIN_URL: localhost:8081/repository/maven-releases/org/springboot/spring-rest-hello-world/1.0.0/spring-rest-hello-world-1.0.0.jar
-kind: ConfigMap
-metadata:
-  name: plugin-properties
