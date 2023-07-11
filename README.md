@@ -15,8 +15,6 @@ $ oc import-image rh-sso-7/sso76-openshift-rhel8:7.6-24 --from=registry.redhat.i
 If we need to have the base image available for all projects it is necesary to add '-n openshift'
 
 
-
-
 # Install a customized RH-SSO 7.6 from scratch.
 
 1) Login in the cluster and set environments vars:
@@ -42,51 +40,69 @@ $ oc create -f ./artifacts/database/sso-database-cm.yaml
 $ oc create -f ./artifacts/database/sso-database-cm.yaml
 ```
 
-4) Creamos el BuildConfig:
+4) Create the BuildConfig:
 ```
 $ oc new-build --name rhsso --binary --strategy docker
 ```
 
-5) Buildeamos la imagen con el BC anterior y el contenido de la carpeta actual:
+5) We build the custom image with previuos BC and the content of current folder:
 ```
 $ oc start-build rhsso --from-dir . --follow
 ```
 
 ### NOTA: 
-Al buildear la imagen con el comando anterior, se incluye la configuración indicada en ./extensions/actions.cli.
-En este componente se han configurado las directivas para que RH-SSO (mediante la tool jboss-cli) modifique el subsistema 'well-known' referenciando al archivo 'mtls_custom.json', que es provisto por el ConfigMap creado en el paso 3 (mtls-endpoints-aliases-cm) y se inyectará posteriormente en el paso 8 (oc set volume...):
+When build process is launched (with previuos command), configuration defined on ./extensions/actions.cli will be included.
+With this component all directives needed to customize our RHSSO instance (through 'jboss-cli' tool) will be applied. 
+Custom values will be inyected using the ConfigMap(DB_JDBC_URL) and Secret(DB_USERNAME and DB_PASSWORD) created previously.
+
+
 
 ### JBOSS-CLI commands:
 ```
-/subsystem=keycloak-server/spi=well-known:add()
-/subsystem=keycloak-server/spi=well-known/provider="openid-configuration":add(enabled=true, properties={"openid-configuration-override"="${openid-configuration-override:}"})
-/system-property=openid-configuration-override:add(value="/opt/eap/extensions/mtls_custom.json")
+/subsystem=datasources/jdbc-driver=$DB_DRIVER_NAME:add( \
+    driver-name=$DB_DRIVER_NAME, \
+    driver-module-name=$DB_EAP_MODULE, \
+    driver-xa-datasource-class-name=$DB_XA_DRIVER \
+)
+
+/subsystem=datasources/data-source=KeycloakDS:remove()
+ 
+/subsystem=datasources/data-source=KeycloakDS:add( \
+    jndi-name=java:jboss/datasources/KeycloakDS, \
+    enabled=true, \
+    use-java-context=true, \
+    connection-url=$DB_JDBC_URL, \
+    driver-name=$DB_DRIVER_NAME, \
+    user-name=$DB_USERNAME, \
+    password=$DB_PASSWORD \
+)
 ```
 
-6) Importar el template de RHSSO 7.5 (si no existe en la carpeta descargada):
+6) -PENDING- Import the RH-SSO 7.6 (if not present on cluster):
+https://github.com/jboss-container-images/redhat-sso-7-openshift-image/blob/sso76-dev/docs/templates/reencrypt/ocp-4.x/sso76-ocp4-x509-https.adoc
 ```
-$ oc create -f ./artifacts/ocp/sso75-ocp4-x509-https.json -n openshift
+$ oc create -f ./artifacts/ocp/sso76-ocp4-x509-https.json -n openshift
 ```
 
 
-7) Creamos el DeploymentConfig de SSO con el template creado en el paso anterior. Le indicamos User admin (y su Password) que se va a crear, para administrar la instancia de RH-SSO.
+7) Create a SSO DeploymentConfig with the previous template. We should define User admin (and Password) to manage the RH-SSO instance.
 ```
-$ oc new-app --template=sso75-ocp4-x509-https \
+$ oc new-app --template=sso76-ocp4-x509-https \
         --param=SSO_ADMIN_USERNAME=admin \
         --param=SSO_ADMIN_PASSWORD="redhat01"
 ```
 
-8) Montar el configmap del paso 3 como volumen:
+8) --PENDING-- Mount the Configmap as a volume:
 ```
 $ oc set volume dc/sso --add --name=mtls-endpoints-aliases-cm --mount-path /opt/eap/extensions/mtls_custom.json --sub-path mtls_custom.json --source='{"configMap":{"name":"mtls-endpoints-aliases-cm","items":[{"key":"mtls_custom.json","path":"mtls_custom.json"}]}}' -n $SSO_PROJECT
 ```
 
-9) Actualizo el 'initialDelaySeconds' del livenessProbe para que tenga mas tiempo el primer deploy: lo paso de 60 a 600 segundos.
+9) --PENDING-- Actualizo el 'initialDelaySeconds' del livenessProbe para que tenga mas tiempo el primer deploy: lo paso de 60 a 600 segundos.
 ```
 $ oc patch dc/sso -p '{"spec":{"template": {"spec": {"containers":[{"name": "sso","livenessProbe": {"initialDelaySeconds":'600'}}]}}}}' -n ${SSO_PROJECT}
 ```
 
-10) Actualizo la IMAGEN BASE a utilizar durante el despliegue.
+10) --PENDING-- Actualizo la IMAGEN BASE a utilizar durante el despliegue.
 El template indica "namespace": "openshift" y el ImageStreamTag "name": "sso75-openshift-rhel8:7.5".
 ```
 $ oc patch dc/sso -p '{"spec": {
@@ -110,17 +126,10 @@ $ oc patch dc/sso -p '{"spec": {
   }}' -n ${SSO_PROJECT} 
 ```
 
-11) Si no se desplegó automáticamente, lanzo el despliegue del DC:
+11) --PENDING-- Si no se desplegó automáticamente, lanzo el despliegue del DC:
 ```
 $ oc rollout latest dc/sso
 ```
-
-12) Valido que el .well-known muestre lo indicado en el ConfigMap (paso 3):
-```
-$ curl -v https://$SSO_ROUTE/auth/realms/master/.well-known/openid-configuration | grep mtls_endpoint_aliases
-```
-
-
 
 --------------------
 POST CONFIGURACIONES
