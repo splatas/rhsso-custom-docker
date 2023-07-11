@@ -1,41 +1,49 @@
 embed-server --std-out=echo --server-config=standalone-openshift.xml
 
 batch
-#
-# set DB_DRIVER_NAME=oracle
-# set DB_USERNAME=$MI_DB_USERNAME
-# set DB_PASSWORD=$MI_DB_PASSWORD
-# set DB_DRIVER=oracle.jdbc.OracleDriver
-# set DB_XA_DRIVER=oracle.jdbc.xa.client.OracleXADataSource
-# set DB_JDBC_URL=jdbc:oracle:thin:@95.216.145.227:1521/XE
-# set DB_EAP_MODULE=com.oracle
-# set FILE=/opt/eap/extensions/ojdbc8-12.2.0.1.0.jar
-# 
-# module add --name=$DB_EAP_MODULE --resources=$FILE --dependencies=javax.api,javax.resource.api
-# 
-# /subsystem=datasources/jdbc-driver=$DB_DRIVER_NAME:add( \
-#     driver-name=$DB_DRIVER_NAME, \
-#     driver-module-name=$DB_EAP_MODULE, \
-#     driver-xa-datasource-class-name=$DB_XA_DRIVER \
-# )
-# 
-# /subsystem=datasources/data-source=KeycloakDS:remove()
-#  
-# /subsystem=datasources/data-source=KeycloakDS:add( \
-#     jndi-name=java:jboss/datasources/KeycloakDS, \
-#     enabled=true, \
-#     use-java-context=true, \
-#     connection-url=$DB_JDBC_URL, \
-#     driver-name=$DB_DRIVER_NAME, \
-#     user-name=$DB_USERNAME, \
-#     password=$DB_PASSWORD \
-# )
+
+echo "--Database CREDENTIALS-----------------------"
+echo " DB_USERNAME= $DB_USERNAME"
+echo " DB_PASSWORD= $DB_PASSWORD"
+echo " DB_JDBC_URL=  $DB_JDBC_URL"
+echo "--Database CREDENTIALS-----------------------"
+
+set DB_USERNAME=$DB_USERNAME
+set DB_PASSWORD=$DB_PASSWORD
+#set DB_JDBC_URL=jdbc:oracle:thin:@95.216.145.227:1521/XE
+set DB_JDBC_URL=$DB_JDBC_URL
+
+set DB_DRIVER_NAME=oracle
+set DB_DRIVER=oracle.jdbc.OracleDriver
+set DB_XA_DRIVER=oracle.jdbc.xa.client.OracleXADataSource
+set DB_EAP_MODULE=com.oracle
+set FILE=/opt/eap/extensions/ojdbc8-12.2.0.1.0.jar
+
+module add --name=$DB_EAP_MODULE --resources=$FILE --dependencies=javax.api,javax.resource.api
+
+/subsystem=datasources/jdbc-driver=$DB_DRIVER_NAME:add( \
+    driver-name=$DB_DRIVER_NAME, \
+    driver-module-name=$DB_EAP_MODULE, \
+    driver-xa-datasource-class-name=$DB_XA_DRIVER \
+)
+
+/subsystem=datasources/data-source=KeycloakDS:remove()
+ 
+/subsystem=datasources/data-source=KeycloakDS:add( \
+    jndi-name=java:jboss/datasources/KeycloakDS, \
+    enabled=true, \
+    use-java-context=true, \
+    connection-url=$DB_JDBC_URL, \
+    driver-name=$DB_DRIVER_NAME, \
+    user-name=$DB_USERNAME, \
+    password=$DB_PASSWORD \
+)
 
 # CONFIGURACION MTLS_ENDPOINTS_ALIASSES
 #if (true) {echo "MTLS_ENDPOINTS_ALIASSES true!!"}
-/subsystem=keycloak-server/spi=well-known:add()
-/subsystem=keycloak-server/spi=well-known/provider="openid-configuration":add(enabled=true, properties={"openid-configuration-override"="${openid-configuration-override:}"})
-/system-property=openid-configuration-override:add(value="/opt/eap/extensions/mtls_custom.json")
+#/subsystem=keycloak-server/spi=well-known:add()
+#/subsystem=keycloak-server/spi=well-known/provider="openid-configuration":add(enabled=true, properties={"openid-configuration-override"="${openid-configuration-override:}"})
+#/system-property=openid-configuration-override:add(value="/opt/eap/extensions/mtls_custom.json")
 
 run-batch
 

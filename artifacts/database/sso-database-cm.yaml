@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sso-database-cm
+immutable: false
+data:
+  DB_JDBC_URL: 'jdbc:oracle:thin:@HOST:PORT/NAME'

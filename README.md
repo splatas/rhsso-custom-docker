@@ -1,28 +1,45 @@
 # Red Hat Single Sign-On
 
-Este extracto cubre el proceso de instalación del producto **Red Hat Single SignOn 7.5** y sus configuraciones necesarias.
+This excerpt covers the installation process of the **Red Hat Single SignOn 7.6** product and its necessary configurations.
+The RH-SSO instance will be connected to an external Oracle 19C Database. For that reason we need to install and configure the proper oracle driver.
+
 
 --------------------------------------
-# INSTALAR RH-SSO CUSTOMIZADO DESDE 0.
-# Se aplicará la customización del .well-known para que muestre lo indicado en el ConfigMap: 
+# Prerequisites
+
+- Import the base image of RH-SSO 7.6
+```
+$ oc import-image rh-sso-7/sso76-openshift-rhel8:7.6-24 --from=registry.redhat.io/rh-sso-7/sso76-openshift-rhel8:7.6-24 --confirm
+```
+
+If we need to have the base image available for all projects it is necesary to add '-n openshift'
 
 
-1) Loguearse al cluster y setear la variable del proyecto:
+
+
+# Install a customized RH-SSO 7.6 from scratch.
+
+1) Login in the cluster and set environments vars:
 
 ```
-$ oc login --token=$CLUSTER_TOKEN --server=https://$MINISHIFT_CLUSTER_URL:6443
+$ oc login --token=$CLUSTER_TOKEN --server=https://$OCP_CLUSTER_URL:6443
 ```
 ```
 $ export SSO_PROJECT=rhsso-dev   (<= NAMESPACE)
 $ oc new-project $SSO_PROJECT
 ```
 
-2) Pararse en la carpeta descargada y ejecutar el build:
+2) Go to downloaded folder and run a build:
 cd /$REPO_GIT
 
-3) Crear Configmap para customizar 'mtls-endpoints_aliases':
+3) Create a Configmap to customize Database URL 'sso-database-cm':
 ```
-$ oc create -f ./artifacts/ocp/mtls-endpoints-aliases-cm.yaml
+$ oc create -f ./artifacts/database/sso-database-cm.yaml
+```
+
+3) Create a Secret to set the Database credentials 'sso-database-secret':
+```
+$ oc create -f ./artifacts/database/sso-database-cm.yaml
 ```
 
 4) Creamos el BuildConfig:

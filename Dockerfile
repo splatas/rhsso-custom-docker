@@ -1,10 +1,6 @@
-FROM registry.redhat.io/rh-sso-7/sso75-openshift-rhel8:7.5
-
-#ARG PLUGIN_URL
-#ARG PLUGIN_USER
-#ARG PLUGIN_PASS
-#ADD http://${PLUGIN_USER}:${PLUGIN_PASS}@${PLUGIN_URL} /opt/eap/standalone/deployments/
-    
+#FROM registry.redhat.io/rh-sso-7/sso76-openshift-rhel8:7.6-24
+FROM registry.redhat.io/rh-sso-7/sso76-openshift-rhel8:latest
+ 
 COPY extensions/* /opt/eap/extensions/
 
 USER root
