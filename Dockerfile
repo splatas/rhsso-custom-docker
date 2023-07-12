@@ -1,5 +1,4 @@
-#FROM registry.redhat.io/rh-sso-7/sso76-openshift-rhel8:7.6-24
-FROM registry.redhat.io/rh-sso-7/sso76-openshift-rhel8:latest
+FROM registry.redhat.io/rh-sso-7/sso76-openshift-rhel8:7.6-24
  
 COPY extensions/* /opt/eap/extensions/
 
