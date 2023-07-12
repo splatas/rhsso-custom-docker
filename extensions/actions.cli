@@ -3,9 +3,9 @@ embed-server --std-out=echo --server-config=standalone-openshift.xml
 batch
 
 echo "--Database CREDENTIALS-----------------------"
-echo " DB_USERNAME= $DB_USERNAME"
-echo " DB_PASSWORD= $DB_PASSWORD"
-echo " DB_JDBC_URL=  $DB_JDBC_URL"
+echo " DB_USERNAME= ${DB_USERNAME}"
+echo " DB_PASSWORD= ${DB_PASSWORD}"
+echo " DB_JDBC_URL=  ${DB_JDBC_URL}"
 echo "--Database CREDENTIALS-----------------------"
 
 set DB_USERNAME=$DB_USERNAME
@@ -38,12 +38,6 @@ module add --name=$DB_EAP_MODULE --resources=$FILE --dependencies=javax.api,java
     user-name=$DB_USERNAME, \
     password=$DB_PASSWORD \
 )
-
-# CONFIGURACION MTLS_ENDPOINTS_ALIASSES
-#if (true) {echo "MTLS_ENDPOINTS_ALIASSES true!!"}
-#/subsystem=keycloak-server/spi=well-known:add()
-#/subsystem=keycloak-server/spi=well-known/provider="openid-configuration":add(enabled=true, properties={"openid-configuration-override"="${openid-configuration-override:}"})
-#/system-property=openid-configuration-override:add(value="/opt/eap/extensions/mtls_custom.json")
 
 run-batch
 
