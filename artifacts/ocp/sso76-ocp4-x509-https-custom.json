@@ -53,7 +53,19 @@
                 "name": "actions-cli-cm",
                 "namespace": "${IMAGE_STREAM_NAMESPACE}"
             }
-        },        
+        }, 
+        {
+            "apiVersion": "v1",
+            "data": {
+                "DB_JDBC_URL": "jdbc:oracle:thin:@HOST:PORT/NAME"
+            },
+            "immutable": false,
+            "kind": "ConfigMap",
+            "metadata": {
+                "name": "sso-database-cm",
+                "namespace": "${IMAGE_STREAM_NAMESPACE}"
+            }
+        },               
         {
             "apiVersion": "v1",
             "kind": "Service",

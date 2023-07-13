@@ -32,12 +32,16 @@ $ oc new-project $SSO_PROJECT
 cd /$REPO_GIT
 
 3) Create a Configmap to customize Database URL 'sso-database-cm' and to apply actions.cli modifications:
-```
-$ oc create -f ./artifacts/database/sso-database-cm.yaml
-```
-```
-$ oc create -f ./artifacts/ocp/actions-cli-cm.yaml 
-```
+
+  -- NOT NECESARY: INCLUDED IN TEMPLATE --
+  ```
+  $ oc create -f ./artifacts/database/sso-database-cm.yaml
+  ```
+
+  -- NOT NECESARY: INCLUDED IN TEMPLATE --
+  ```
+  $ oc create -f ./artifacts/ocp/actions-cli-cm.yaml 
+  ```
 
 3) Create a Secret to set the Database credentials 'sso-database-secret':
 ```
