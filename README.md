@@ -31,9 +31,12 @@ $ oc new-project $SSO_PROJECT
 2) Go to downloaded folder and run a build:
 cd /$REPO_GIT
 
-3) Create a Configmap to customize Database URL 'sso-database-cm':
+3) Create a Configmap to customize Database URL 'sso-database-cm' and to apply actions.cli modifications:
 ```
 $ oc create -f ./artifacts/database/sso-database-cm.yaml
+```
+```
+$ oc create -f ./artifacts/ocp/actions-cli-cm.yaml 
 ```
 
 3) Create a Secret to set the Database credentials 'sso-database-secret':
@@ -80,9 +83,9 @@ Custom values will be inyected using the ConfigMap(DB_JDBC_URL) and Secret(DB_US
 
 6) --REMOVE-- Import the Basic RH-SSO 7.6  Template (if not present on cluster):
 https://github.com/jboss-container-images/redhat-sso-7-openshift-image/blob/sso76-dev/docs/templates/reencrypt/ocp-4.x/sso76-ocp4-x509-https.adoc
-```
-$ oc create -f ./artifacts/ocp/sso76-ocp4-x509-https.json -n openshift
-```
+    ```
+    $ oc create -f ./artifacts/ocp/sso76-ocp4-x509-https.json -n openshift
+    ```
 
 
   => 6.1) Import the custom RH-SSO 7.6 Template.
@@ -95,17 +98,20 @@ $ oc create -f ./artifacts/ocp/sso76-ocp4-x509-https.json -n openshift
         - Reference to custom Image: 'rhsso:latest'
 
   ```
-  $ oc create -f ./artifacts/ocp/sso76-ocp4-x509-https-custom.json \
+  $ oc create -f ./artifacts/ocp/sso76-ocp4-x509-https-custom.json
       -n openshift
   ```
 
 
 7) Create a SSO DeploymentConfig with the previous template. We should define User admin (and Password) to manage the RH-SSO instance.
-```
-$ oc new-app --template=sso76-ocp4-x509-https \
-        --param=SSO_ADMIN_USERNAME=admin \
-        --param=SSO_ADMIN_PASSWORD="redhat01"        
-```
+
+    --- REMOVE ---
+    ```
+    $ oc new-app --template=sso76-ocp4-x509-https \
+            --param=SSO_ADMIN_USERNAME=admin \
+            --param=SSO_ADMIN_PASSWORD="redhat01"        
+    ```
+    --- REMOVE ---
 
   Params:
     IMAGE_STREAM_NAMESPACE=Namespace where custom image will be persisted (current namespace?)
@@ -122,10 +128,12 @@ $ oc new-app --template=sso76-ocp4-x509-https \
 $ oc set volume dc/sso --add --name=actions-cli-cm --mount-path /opt/eap/extensions/actions.cli --sub-path actions.cli --source='{"configMap":{"name":"actions-cli-cm","items":[{"key":"actions.cli","path":"actions.cli"}]}}' -n $SSO_PROJECT
 ```
 
+  --- REMOVE ---
   Fake 'actions-cli': is an empty file just for testing
   ```
   $ oc set volume dc/sso --add --name=actions-cli-cm-fake --mount-path /opt/eap/extensions/actions.cli --sub-path actions.cli --source='{"configMap":{"name":"actions-cli-cm-fake","items":[{"key":"actions.cli","path":"actions.cli"}]}}' -n $SSO_PROJECT
   ```
+  --- REMOVE ---
 
 9) --NOT NECESARY-- Actualizo el 'initialDelaySeconds' del livenessProbe para que tenga mas tiempo el primer deploy: lo paso de 60 a 600 segundos.
 ```
