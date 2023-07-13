@@ -45,6 +45,17 @@
         },
         {
             "apiVersion": "v1",
+            "data": {
+                "actions.cli": "embed-server --std-out=echo --server-config=standalone-openshift.xml\n\nbatch\n\nset DB_USERNAME=$DB_USERNAME\nset DB_PASSWORD=$DB_PASSWORD\nset DB_JDBC_URL=$DB_JDBC_URL\n\nset DB_DRIVER_NAME=oracle\nset DB_DRIVER=oracle.jdbc.OracleDriver\nset DB_XA_DRIVER=oracle.jdbc.xa.client.OracleXADataSource\nset DB_EAP_MODULE=com.oracle\nset FILE=/opt/eap/extensions/ojdbc8-12.2.0.1.0.jar\n\nmodule add --name=$DB_EAP_MODULE --resources=$FILE --dependencies=javax.api,javax.resource.api\n\n/subsystem=datasources/jdbc-driver=$DB_DRIVER_NAME:add( \\\n    driver-name=$DB_DRIVER_NAME, \\\n    driver-module-name=$DB_EAP_MODULE, \\\n    driver-xa-datasource-class-name=$DB_XA_DRIVER \\\n)\n\n/subsystem=datasources/data-source=KeycloakDS:remove()\n\n \n/subsystem=datasources/data-source=KeycloakDS:add( \\\n    jndi-name=java:jboss/datasources/KeycloakDS, \\\n    enabled=true, \\\n    use-java-context=true, \\\n    connection-url=$DB_JDBC_URL, \\\n    driver-name=$DB_DRIVER_NAME, \\\n    user-name=$DB_USERNAME, \\\n    password=$DB_PASSWORD \\\n)\n\nrun-batch\n\nquit\n"
+            },
+            "kind": "ConfigMap",
+            "metadata": {
+                "name": "actions-cli-cm",
+                "namespace": "${IMAGE_STREAM_NAMESPACE}"
+            }
+        },        
+        {
+            "apiVersion": "v1",
             "kind": "Service",
             "metadata": {
                 "annotations": {

@@ -9,22 +9,10 @@ data:
 
     batch
 
-    echo "--Database CREDENTIALS-----------------------"
-
-    echo " DB_USERNAME= ${DB_USERNAME}"
-
-    echo " DB_PASSWORD= ${DB_PASSWORD}"
-
-    echo " DB_JDBC_URL=  ${DB_JDBC_URL}"
-
-    echo "--Database CREDENTIALS-----------------------"
-
 
     set DB_USERNAME=$DB_USERNAME
 
     set DB_PASSWORD=$DB_PASSWORD
-
-    #set DB_JDBC_URL=jdbc:oracle:thin:@95.216.145.227:1521/XE
 
     set DB_JDBC_URL=$DB_JDBC_URL
 
@@ -64,6 +52,8 @@ data:
         password=$DB_PASSWORD \
     )
 
+
     run-batch
+
 
     quit
