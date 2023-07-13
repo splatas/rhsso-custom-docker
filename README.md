@@ -22,8 +22,9 @@ If we need to have the base image available for all projects it is necesary to a
 ```
 $ oc login --token=$CLUSTER_TOKEN --server=https://$OCP_CLUSTER_URL:6443
 ```
+
 ```
-$ export SSO_PROJECT=rhsso-dev   (<= NAMESPACE)
+$ export SSO_PROJECT=rhsso-dev   (<= CHANGE NAMESPACE)
 $ oc new-project $SSO_PROJECT
 ```
 
@@ -50,14 +51,13 @@ $ oc new-build --name rhsso --binary --strategy docker
 $ oc start-build rhsso --from-dir . --follow
 ```
 
-### NOTA: 
+### NOTES: 
 When build process is launched (with previuos command), configuration defined on ./extensions/actions.cli will be included.
 With this component all directives needed to customize our RHSSO instance (through 'jboss-cli' tool) will be applied. 
 Custom values will be inyected using the ConfigMap(DB_JDBC_URL) and Secret(DB_USERNAME and DB_PASSWORD) created previously.
 
 
-
-### JBOSS-CLI commands:
+### Detailed JBOSS-CLI commands applied:
 ```
 /subsystem=datasources/jdbc-driver=$DB_DRIVER_NAME:add( \
     driver-name=$DB_DRIVER_NAME, \
@@ -78,27 +78,54 @@ Custom values will be inyected using the ConfigMap(DB_JDBC_URL) and Secret(DB_US
 )
 ```
 
-6) Import the RH-SSO 7.6 (if not present on cluster):
+6) --REMOVE-- Import the Basic RH-SSO 7.6  Template (if not present on cluster):
 https://github.com/jboss-container-images/redhat-sso-7-openshift-image/blob/sso76-dev/docs/templates/reencrypt/ocp-4.x/sso76-ocp4-x509-https.adoc
 ```
 $ oc create -f ./artifacts/ocp/sso76-ocp4-x509-https.json -n openshift
 ```
 
 
+  => 6.1) Import the custom RH-SSO 7.6 Template.
+  This template has the following changes:
+    - DeploymentConfig: 
+        - Reference to ConfigMap 'sso-database-cm'
+        - Reference to Secret 'sso-database-secret'
+        - Reference to ConfigMap 'actions-cli-cm'
+        - Mount volume (ConfigMap 'actions-cli-cm')
+        - Reference to custom Image: 'rhsso:latest'
+
+  ```
+  $ oc create -f ./artifacts/ocp/sso76-ocp4-x509-https-custom.json \
+      -n openshift
+  ```
+
+
 7) Create a SSO DeploymentConfig with the previous template. We should define User admin (and Password) to manage the RH-SSO instance.
 ```
 $ oc new-app --template=sso76-ocp4-x509-https \
         --param=SSO_ADMIN_USERNAME=admin \
-        --param=SSO_ADMIN_PASSWORD="redhat01"
+        --param=SSO_ADMIN_PASSWORD="redhat01"        
 ```
+
+  Params:
+    IMAGE_STREAM_NAMESPACE=Namespace where custom image will be persisted (current namespace?)
+
+    ```
+    $ oc new-app --template=sso76-ocp4-x509-https-custom \
+            --param=SSO_ADMIN_USERNAME=admin \
+            --param=SSO_ADMIN_PASSWORD="redhat01" \
+            --param=IMAGE_STREAM_NAMESPACE=rhn-gps-splatas-dev
+    ```
 
 8) Mount the Configmap as a volume:
 ```
 $ oc set volume dc/sso --add --name=actions-cli-cm --mount-path /opt/eap/extensions/actions.cli --sub-path actions.cli --source='{"configMap":{"name":"actions-cli-cm","items":[{"key":"actions.cli","path":"actions.cli"}]}}' -n $SSO_PROJECT
 ```
 
-
-
+  Fake 'actions-cli': is an empty file just for testing
+  ```
+  $ oc set volume dc/sso --add --name=actions-cli-cm-fake --mount-path /opt/eap/extensions/actions.cli --sub-path actions.cli --source='{"configMap":{"name":"actions-cli-cm-fake","items":[{"key":"actions.cli","path":"actions.cli"}]}}' -n $SSO_PROJECT
+  ```
 
 9) --NOT NECESARY-- Actualizo el 'initialDelaySeconds' del livenessProbe para que tenga mas tiempo el primer deploy: lo paso de 60 a 600 segundos.
 ```
@@ -129,10 +156,18 @@ $ oc patch dc/sso -p '{"spec": {
   }' -n $SSO_PROJECT
 ```
 
-11) --PENDING-- Si no se desplegó automáticamente, lanzo el despliegue del DC:
+11) Si no se desplegó automáticamente, lanzo el despliegue del DC:
 ```
 $ oc rollout latest dc/sso
 ```
+
+12) Change number of replicas
+```
+$ oc scale --replicas=0 dc/sso
+```
+
+
+
 
 --------------------
 POST CONFIGURACIONES
