@@ -31,6 +31,19 @@
     "objects": [
         {
             "apiVersion": "v1",
+            "data": {
+                "DB_PASSWORD": "Q0hBTkdFX01F",
+                "DB_USERNAME": "Q0hBTkdFX01F"
+            },
+            "kind": "Secret",
+            "metadata": {
+                "name": "sso-database-secret",
+                "namespace": "${IMAGE_STREAM_NAMESPACE}"
+            },
+            "type": "Opaque"
+        },
+        {
+            "apiVersion": "v1",
             "kind": "ConfigMap",
             "metadata": {
                 "annotations": {

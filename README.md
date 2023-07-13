@@ -43,10 +43,13 @@ cd /$REPO_GIT
   $ oc create -f ./artifacts/ocp/actions-cli-cm.yaml 
   ```
 
-3) Create a Secret to set the Database credentials 'sso-database-secret':
-```
-$ oc create -f ./artifacts/database/sso-database-secret.yaml
-```
+3) Create a Secret to set the Database credentials 'sso-database-secret'.
+   Values must be Base64 encoded (https://www.base64decode.org/): 
+  
+  -- NOT NECESARY: INCLUDED IN TEMPLATE --
+  ```
+  $ oc create -f ./artifacts/database/sso-database-secret.yaml
+  ```
 
 4) Create the BuildConfig:
 ```
