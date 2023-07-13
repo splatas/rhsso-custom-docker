@@ -7,7 +7,7 @@ The RH-SSO instance will be connected to an external Oracle 19C Database. For th
 --------------------------------------
 # Prerequisites
 
-- Import the base image of RH-SSO 7.6
+- Import the base image of RH-SSO 7.6 (if not present in the installation Cluster)
 ```
 $ oc import-image rh-sso-7/sso76-openshift-rhel8:7.6-24 --from=registry.redhat.io/rh-sso-7/sso76-openshift-rhel8:7.6-24 --confirm
 ```
@@ -44,6 +44,7 @@ cd /$REPO_GIT
   ```
 
 3) Create a Secret to set the Database credentials 'sso-database-secret'.
+   IMPORTANT!
    Values must be Base64 encoded (https://www.base64decode.org/): 
   
   -- NOT NECESARY: INCLUDED IN TEMPLATE --
@@ -131,23 +132,29 @@ https://github.com/jboss-container-images/redhat-sso-7-openshift-image/blob/sso7
     ```
 
 8) Mount the Configmap as a volume:
+
+-- NOT NECESARY: INCLUDED IN TEMPLATE --
 ```
 $ oc set volume dc/sso --add --name=actions-cli-cm --mount-path /opt/eap/extensions/actions.cli --sub-path actions.cli --source='{"configMap":{"name":"actions-cli-cm","items":[{"key":"actions.cli","path":"actions.cli"}]}}' -n $SSO_PROJECT
 ```
 
-  --- REMOVE ---
+  --- REMOVE!!! ---
   Fake 'actions-cli': is an empty file just for testing
   ```
   $ oc set volume dc/sso --add --name=actions-cli-cm-fake --mount-path /opt/eap/extensions/actions.cli --sub-path actions.cli --source='{"configMap":{"name":"actions-cli-cm-fake","items":[{"key":"actions.cli","path":"actions.cli"}]}}' -n $SSO_PROJECT
   ```
-  --- REMOVE ---
+  --- REMOVE!!! ---
 
-9) --NOT NECESARY-- Actualizo el 'initialDelaySeconds' del livenessProbe para que tenga mas tiempo el primer deploy: lo paso de 60 a 600 segundos.
+9) Update 'initialDelaySeconds' in livenessProbe in order to have more time on first deployment: from 60 to 600 seconds.
+
+  -- VERIFY IN TEMPLATE --
 ```
 $ oc patch dc/sso -p '{"spec":{"template": {"spec": {"containers":[{"name": "sso","livenessProbe": {"initialDelaySeconds":'600'}}]}}}}' -n ${SSO_PROJECT}
 ```
 
-10) --PENDING-- Actualizo la IMAGEN BASE a utilizar durante el despliegue.
+10) Actualizo la IMAGEN BASE a utilizar durante el despliegue.
+
+-- NOT NECESARY: INCLUDED IN TEMPLATE --
 The original template shows "namespace": "openshift" and ImageStreamTag "name": "sso76-openshift-rhel8:7.6-24".
 ```
 $ oc patch dc/sso -p '{"spec": {
@@ -171,7 +178,7 @@ $ oc patch dc/sso -p '{"spec": {
   }' -n $SSO_PROJECT
 ```
 
-11) Si no se desplegó automáticamente, lanzo el despliegue del DC:
+11) If deployment is not triggered automatically, launch it manually:
 ```
 $ oc rollout latest dc/sso
 ```
@@ -180,32 +187,3 @@ $ oc rollout latest dc/sso
 ```
 $ oc scale --replicas=0 dc/sso
 ```
-
-
-
-
---------------------
-POST CONFIGURACIONES
---------------------
-A) ------>    HECHO EN EL PASO 10.   <------
-
-  Hacer un override del deployment para agregar la imagen nueva:
-  OJO EL NAMESPACE: dice 'openshift' pero puede estar en el NAMESPACE de la instalación.
-  ----------------
-  - type: ImageChange
-    imageChangeParams:
-      automatic: true
-      containerNames:
-        - sso
-      from:
-        kind: ImageStreamTag
-        namespace: openshift  <== $SSO_PROJECT
-        name: 'rhsso:latest'
-      lastTriggeredImage: >-
-     image-registry.openshift-image-registry.svc:5000/rh-sso/rhsso@sha256:3bd57de93a781e1633919dc26e189a665ca28dad20912136851df3fd0f87f156
-  - type: ConfigChange
-
-
-B)  ------>    HECHO EN EL PASO 9.   <------ 
-Actualizar los healthchecks
-SI ERROR EN PRIMER DEPLOY (TIMEOUT): Actualizar el DC livenessProbe / initialDelaySeconds: 60 => 600 
