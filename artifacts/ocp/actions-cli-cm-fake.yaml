@@ -1,0 +1,22 @@
+﻿kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: actions-cli-cm
+data:
+  actions.cli: >
+    embed-server --std-out=echo --server-config=standalone-openshift.xml
+
+
+    batch
+    
+    
+    echo "---------------------------------------------------------"
+
+    echo "THIS IS AN EMPTY 'actions.cli': nothing will be modified!"
+
+    echo "---------------------------------------------------------"
+
+    
+    run-batch
+
+    quit
