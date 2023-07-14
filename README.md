@@ -28,28 +28,30 @@ $ export SSO_PROJECT=rhsso-dev   (<= CHANGE NAMESPACE)
 $ oc new-project $SSO_PROJECT
 ```
 
-2) Go to downloaded folder and run a build:
-cd /$REPO_GIT
+2) Go to repository folder:
+```
+$ cd rhsso-custom-docker
+```
 
-3) Create a Configmap to customize Database URL 'sso-database-cm' and to apply actions.cli modifications:
+3) Import the Custom RH-SSO 7.6 Template.
+  This template has the following changes:
+    - DeploymentConfig: 
+        - Reference to ConfigMap 'sso-database-cm'
+        - Reference to Secret 'sso-database-secret'
+        - Reference to ConfigMap 'actions-cli-cm'
+        - Mount volume (ConfigMap 'actions-cli-cm')
+        - Reference to custom Image: 'rhsso:latest'
 
-  -- NOT NECESARY: INCLUDED IN TEMPLATE --
-  ```
-  $ oc create -f ./artifacts/database/sso-database-cm.yaml
-  ```
+```
+$ oc create -f ./artifacts/ocp/sso76-ocp4-x509-https-custom.json \
+    -n openshift
+```
 
-  -- NOT NECESARY: INCLUDED IN TEMPLATE --
+  ### NEXT COMMAND IS NOT NECESARY: Original RH-SSO 7.6  Template (only for reference) 
+  https://github.com/jboss-container-images/redhat-sso-7-openshift-image/blob/sso76-dev/docs/templates/reencrypt/ocp-4.x/sso76-ocp4-x509-https.adoc
+      
   ```
-  $ oc create -f ./artifacts/ocp/actions-cli-cm.yaml 
-  ```
-
-3) Create a Secret to set the Database credentials 'sso-database-secret'.
-   IMPORTANT!
-   Values must be Base64 encoded (https://www.base64decode.org/): 
-  
-  -- NOT NECESARY: INCLUDED IN TEMPLATE --
-  ```
-  $ oc create -f ./artifacts/database/sso-database-secret.yaml
+  $ oc create -f ./artifacts/ocp/sso76-ocp4-x509-https.json -n openshift
   ```
 
 4) Create the BuildConfig:
@@ -62,13 +64,13 @@ $ oc new-build --name rhsso --binary --strategy docker
 $ oc start-build rhsso --from-dir . --follow
 ```
 
-### NOTES: 
+### NOTES 
 When build process is launched (with previuos command), configuration defined on ./extensions/actions.cli will be included.
 With this component all directives needed to customize our RHSSO instance (through 'jboss-cli' tool) will be applied. 
 Custom values will be inyected using the ConfigMap(DB_JDBC_URL) and Secret(DB_USERNAME and DB_PASSWORD) created previously.
 
 
-### Detailed JBOSS-CLI commands applied:
+### Detailed JBOSS-CLI commands applied
 ```
 /subsystem=datasources/jdbc-driver=$DB_DRIVER_NAME:add( \
     driver-name=$DB_DRIVER_NAME, \
@@ -89,101 +91,94 @@ Custom values will be inyected using the ConfigMap(DB_JDBC_URL) and Secret(DB_US
 )
 ```
 
-6) --REMOVE-- Import the Basic RH-SSO 7.6  Template (if not present on cluster):
-https://github.com/jboss-container-images/redhat-sso-7-openshift-image/blob/sso76-dev/docs/templates/reencrypt/ocp-4.x/sso76-ocp4-x509-https.adoc
-    ```
-    $ oc create -f ./artifacts/ocp/sso76-ocp4-x509-https.json -n openshift
-    ```
+6) Create a SSO instance with the previous template. We should define User admin (and Password) to manage the RH-SSO instance.
 
-
-  => 6.1) Import the custom RH-SSO 7.6 Template.
-  This template has the following changes:
-    - DeploymentConfig: 
-        - Reference to ConfigMap 'sso-database-cm'
-        - Reference to Secret 'sso-database-secret'
-        - Reference to ConfigMap 'actions-cli-cm'
-        - Mount volume (ConfigMap 'actions-cli-cm')
-        - Reference to custom Image: 'rhsso:latest'
+Params:
+  IMAGE_STREAM_NAMESPACE = Namespace where custom image will be persisted (current namespace?)
 
   ```
-  $ oc create -f ./artifacts/ocp/sso76-ocp4-x509-https-custom.json
-      -n openshift
+  $ oc new-app --template=sso76-ocp4-x509-https-custom \
+          --param=SSO_ADMIN_USERNAME=admin \
+          --param=SSO_ADMIN_PASSWORD="redhat01" \
+          --param=IMAGE_STREAM_NAMESPACE=rhn-gps-splatas-dev
   ```
 
 
-7) Create a SSO DeploymentConfig with the previous template. We should define User admin (and Password) to manage the RH-SSO instance.
 
-    --- REMOVE ---
-    ```
-    $ oc new-app --template=sso76-ocp4-x509-https \
-            --param=SSO_ADMIN_USERNAME=admin \
-            --param=SSO_ADMIN_PASSWORD="redhat01"        
-    ```
-    --- REMOVE ---
 
-  Params:
-    IMAGE_STREAM_NAMESPACE=Namespace where custom image will be persisted (current namespace?)
+# Appendix
 
-    ```
-    $ oc new-app --template=sso76-ocp4-x509-https-custom \
-            --param=SSO_ADMIN_USERNAME=admin \
-            --param=SSO_ADMIN_PASSWORD="redhat01" \
-            --param=IMAGE_STREAM_NAMESPACE=rhn-gps-splatas-dev
-    ```
+There are several single commands that are not necessary to run, due to were applied on Custom Template.
+The are here only for reference.
 
-8) Mount the Configmap as a volume:
+A) Create a Configmap to customize Database URL 'sso-database-cm' and to apply actions.cli modifications:
 
--- NOT NECESARY: INCLUDED IN TEMPLATE --
-```
-$ oc set volume dc/sso --add --name=actions-cli-cm --mount-path /opt/eap/extensions/actions.cli --sub-path actions.cli --source='{"configMap":{"name":"actions-cli-cm","items":[{"key":"actions.cli","path":"actions.cli"}]}}' -n $SSO_PROJECT
-```
-
-  --- REMOVE!!! ---
-  Fake 'actions-cli': is an empty file just for testing
+  ### NEXT COMMAND IS NOT NECESARY: INCLUDED IN CUSTOM TEMPLATE
   ```
-  $ oc set volume dc/sso --add --name=actions-cli-cm-fake --mount-path /opt/eap/extensions/actions.cli --sub-path actions.cli --source='{"configMap":{"name":"actions-cli-cm-fake","items":[{"key":"actions.cli","path":"actions.cli"}]}}' -n $SSO_PROJECT
+  $ oc create -f ./artifacts/database/sso-database-cm.yaml
   ```
-  --- REMOVE!!! ---
 
-9) Update 'initialDelaySeconds' in livenessProbe in order to have more time on first deployment: from 60 to 600 seconds.
+  ### NEXT COMMAND IS NOT NECESARY: INCLUDED IN CUSTOM TEMPLATE
+  ```
+  $ oc create -f ./artifacts/ocp/actions-cli-cm.yaml 
+  ```
 
-  -- VERIFY IN TEMPLATE --
-```
-$ oc patch dc/sso -p '{"spec":{"template": {"spec": {"containers":[{"name": "sso","livenessProbe": {"initialDelaySeconds":'600'}}]}}}}' -n ${SSO_PROJECT}
-```
+B) Create a Secret to set the Database credentials 'sso-database-secret'.
+   IMPORTANT!
+   Values must be Base64 encoded (https://www.base64decode.org/): 
+  
+  ### NEXT COMMAND IS NOT NECESARY: INCLUDED IN CUSTOM TEMPLATE
+  ```
+  $ oc create -f ./artifacts/database/sso-database-secret.yaml
+  ```
 
-10) Actualizo la IMAGEN BASE a utilizar durante el despliegue.
+C) Mount the Configmap 'actions-cli-cm' as a volume:
 
--- NOT NECESARY: INCLUDED IN TEMPLATE --
-The original template shows "namespace": "openshift" and ImageStreamTag "name": "sso76-openshift-rhel8:7.6-24".
-```
-$ oc patch dc/sso -p '{"spec": {
-    "triggers": [
-      {
-        "type": "ImageChange",
-        "imageChangeParams": {
-          "automatic": true,
-          "containerNames": [
-            "sso"
-          ],
-          "from": {
-            "kind": "ImageStreamTag",
-            "namespace": "rhn-gps-splatas-dev",
-            "name": "rhsso:latest"
+  ###  NOT NECESARY: INCLUDED IN CUSTOM TEMPLATE
+  ```
+  $ oc set volume dc/sso --add --name=actions-cli-cm --mount-path /opt/eap/extensions/actions.cli --sub-path actions.cli --source='{"configMap":{"name":"actions-cli-cm","items":[{"key":"actions.cli","path":"actions.cli"}]}}' -n $SSO_PROJECT
+  ```
+
+D) Update 'initialDelaySeconds' in livenessProbe in order to have more time on first deployment: from 60 to 600 seconds.
+
+  ###  NOT NECESARY: INCLUDED IN CUSTOM TEMPLATE
+  ```
+  $ oc patch dc/sso -p '{"spec":{"template": {"spec": {"containers":[{"name": "sso","livenessProbe": {"initialDelaySeconds":'600'}}]}}}}' -n ${SSO_PROJECT}
+  ```
+
+E) Actualizo la IMAGEN BASE a utilizar durante el despliegue.
+
+  ###  NOT NECESARY: INCLUDED IN CUSTOM TEMPLATE --
+  The original template shows "namespace": "openshift" and ImageStreamTag "name": "sso76-openshift-rhel8:7.6-24".
+  ```
+  $ oc patch dc/sso -p '{"spec": {
+      "triggers": [
+        {
+          "type": "ImageChange",
+          "imageChangeParams": {
+            "automatic": true,
+            "containerNames": [
+              "sso"
+            ],
+            "from": {
+              "kind": "ImageStreamTag",
+              "namespace": "rhn-gps-splatas-dev",
+              "name": "rhsso:latest"
+            }
           }
         }
-      }
-    ]
-  }
-  }' -n $SSO_PROJECT
-```
+      ]
+    }
+    }' -n $SSO_PROJECT
+  ```
 
-11) If deployment is not triggered automatically, launch it manually:
+
+F) If deployment is not triggered automatically, launch it manually:
 ```
 $ oc rollout latest dc/sso
 ```
 
-12) Change number of replicas
+G) Change number of replicas
 ```
 $ oc scale --replicas=0 dc/sso
 ```
