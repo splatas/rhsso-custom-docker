@@ -285,7 +285,7 @@
                                             "/opt/eap/bin/livenessProbe.sh"
                                         ]
                                     },
-                                    "initialDelaySeconds": 60
+                                    "initialDelaySeconds": 360
                                 },
                                 "name": "${APPLICATION_NAME}",
                                 "ports": [
