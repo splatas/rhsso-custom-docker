@@ -38,7 +38,10 @@
             "kind": "Secret",
             "metadata": {
                 "name": "sso-database-secret",
-                "namespace": "${IMAGE_STREAM_NAMESPACE}"
+                "namespace": "${IMAGE_STREAM_NAMESPACE}",
+                "labels": {
+                    "application": "${APPLICATION_NAME}"
+                }
             },
             "type": "Opaque"
         },
@@ -63,6 +66,9 @@
             },
             "kind": "ConfigMap",
             "metadata": {
+                "labels": {
+                    "application": "${APPLICATION_NAME}"
+                },
                 "name": "actions-cli-cm",
                 "namespace": "${IMAGE_STREAM_NAMESPACE}"
             }
@@ -75,6 +81,9 @@
             "immutable": false,
             "kind": "ConfigMap",
             "metadata": {
+                "labels": {
+                    "application": "${APPLICATION_NAME}"
+                },
                 "name": "sso-database-cm",
                 "namespace": "${IMAGE_STREAM_NAMESPACE}"
             }
@@ -396,7 +405,7 @@
                             ],
                             "from": {
                                 "kind": "ImageStreamTag",
-                        "name": "rhsso:latest",
+                                "name": "rhsso:latest",
                                 "namespace": "${IMAGE_STREAM_NAMESPACE}"
                             }
                         },
