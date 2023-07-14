@@ -17,7 +17,7 @@ If we need to have the base image available for all projects it is necesary to a
 
 # Install a customized RH-SSO 7.6 from scratch.
 
-1) Login in the cluster and set environments vars:
+## 1. Login in the cluster and set environments vars
 
 ```
 $ oc login --token=$CLUSTER_TOKEN --server=https://$OCP_CLUSTER_URL:6443
@@ -28,12 +28,12 @@ $ export SSO_PROJECT=rhsso-dev   (<= CHANGE NAMESPACE)
 $ oc new-project $SSO_PROJECT
 ```
 
-2) Go to repository folder:
+## 2. Go to repository folder
 ```
 $ cd rhsso-custom-docker
 ```
 
-3) Import the Custom RH-SSO 7.6 Template.
+## 3. Import the Custom RH-SSO 7.6 Template
   This template has the following changes:
     - DeploymentConfig: 
         - Reference to ConfigMap 'sso-database-cm'
@@ -47,19 +47,19 @@ $ oc create -f ./artifacts/ocp/sso76-ocp4-x509-https-custom.json \
     -n openshift
 ```
 
-  ### NEXT COMMAND IS NOT NECESARY: Original RH-SSO 7.6  Template (only for reference) 
+  ##### NEXT COMMAND IS NOT NECESARY: Original RH-SSO 7.6  Template (only for reference) 
   https://github.com/jboss-container-images/redhat-sso-7-openshift-image/blob/sso76-dev/docs/templates/reencrypt/ocp-4.x/sso76-ocp4-x509-https.adoc
       
   ```
   $ oc create -f ./artifacts/ocp/sso76-ocp4-x509-https.json -n openshift
   ```
 
-4) Create the BuildConfig:
+## 4. Create the BuildConfig
 ```
 $ oc new-build --name rhsso --binary --strategy docker
 ```
 
-5) We build the custom image with previuos BC and the content of current folder:
+## 5. Build the custom image with previuos BC and the content of current folder
 ```
 $ oc start-build rhsso --from-dir . --follow
 ```
@@ -70,7 +70,7 @@ With this component all directives needed to customize our RHSSO instance (throu
 Custom values will be inyected using the ConfigMap(DB_JDBC_URL) and Secret(DB_USERNAME and DB_PASSWORD) created previously.
 
 
-### Detailed JBOSS-CLI commands applied
+#### Detailed JBOSS-CLI commands applied
 ```
 /subsystem=datasources/jdbc-driver=$DB_DRIVER_NAME:add( \
     driver-name=$DB_DRIVER_NAME, \
@@ -91,7 +91,7 @@ Custom values will be inyected using the ConfigMap(DB_JDBC_URL) and Secret(DB_US
 )
 ```
 
-6) Create a SSO instance with the previous template. We should define User admin (and Password) to manage the RH-SSO instance.
+## 6. Create a SSO instance with the previous template. We should define User admin (and Password) to manage the RH-SSO instance.
 
 Params:
   IMAGE_STREAM_NAMESPACE = Namespace where custom image will be persisted (current namespace?)
@@ -104,7 +104,7 @@ Params:
   ```
 
 
-
+---
 
 # Appendix
 
@@ -113,12 +113,12 @@ The are here only for reference.
 
 A) Create a Configmap to customize Database URL 'sso-database-cm' and to apply actions.cli modifications:
 
-  ### NEXT COMMAND IS NOT NECESARY: INCLUDED IN CUSTOM TEMPLATE
+  ##### NEXT COMMAND IS NOT NECESARY: INCLUDED IN CUSTOM TEMPLATE
   ```
   $ oc create -f ./artifacts/database/sso-database-cm.yaml
   ```
 
-  ### NEXT COMMAND IS NOT NECESARY: INCLUDED IN CUSTOM TEMPLATE
+  ##### NEXT COMMAND IS NOT NECESARY: INCLUDED IN CUSTOM TEMPLATE
   ```
   $ oc create -f ./artifacts/ocp/actions-cli-cm.yaml 
   ```
@@ -127,7 +127,7 @@ B) Create a Secret to set the Database credentials 'sso-database-secret'.
    IMPORTANT!
    Values must be Base64 encoded (https://www.base64decode.org/): 
   
-  ### NEXT COMMAND IS NOT NECESARY: INCLUDED IN CUSTOM TEMPLATE
+  ##### NEXT COMMAND IS NOT NECESARY: INCLUDED IN CUSTOM TEMPLATE
   ```
   $ oc create -f ./artifacts/database/sso-database-secret.yaml
   ```
