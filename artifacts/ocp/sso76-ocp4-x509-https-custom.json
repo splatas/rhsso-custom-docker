@@ -285,7 +285,8 @@
                                             "/opt/eap/bin/livenessProbe.sh"
                                         ]
                                     },
-                                    "initialDelaySeconds": 360
+                                    "initialDelaySeconds": 360,
+                                    "timeoutSeconds": 3
                                 },
                                 "name": "${APPLICATION_NAME}",
                                 "ports": [
@@ -318,7 +319,8 @@
                                             "/opt/eap/bin/readinessProbe.sh"
                                         ]
                                     },
-                                    "initialDelaySeconds": 10
+                                    "initialDelaySeconds": 10,
+                                    "timeoutSeconds": 3
                                 },
                                 "resources": {
                                     "limits": {
