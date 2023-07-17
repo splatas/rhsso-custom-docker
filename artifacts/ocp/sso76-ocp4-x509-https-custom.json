@@ -72,6 +72,19 @@
                 "name": "actions-cli-cm",
                 "namespace": "${IMAGE_STREAM_NAMESPACE}"
             }
+        },
+        {
+            "apiVersion": "v1",
+            "data": {
+                "messages_pl.properties": "loginAccountTitle=Zaloguj się na swoje konto\nusernameOrEmail=Nazwa użytkownika\npassword=Hasło"
+            },
+            "kind": "ConfigMap",
+            "metadata": {
+                "labels": {
+                    "application": "${APPLICATION_NAME}"
+                },
+                "name": "logging-messages-pl-cm"
+            }
         }, 
         {
             "apiVersion": "v1",
