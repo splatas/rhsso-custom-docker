@@ -83,7 +83,8 @@
                 "labels": {
                     "application": "${APPLICATION_NAME}"
                 },
-                "name": "logging-messages-pl-cm"
+                "name": "logging-messages-pl-cm",
+                "namespace": "${IMAGE_STREAM_NAMESPACE}"
             }
         }, 
         {
@@ -365,6 +366,11 @@
                                         "mountPath": "/opt/eap/extensions/actions.cli",
                                         "name": "actions-cli-cm",
                                         "subPath": "actions.cli"
+                                    },
+                                    {
+                                        "mountPath": "/opt/eap/themes/mytheme/login/messages/messages_pl.properties",
+                                        "name": "logging-messages-pl-cm",
+                                        "subPath": "messages_pl.properties"
                                     }
                                 ]
                             }
@@ -394,19 +400,32 @@
                                     "medium": "Memory"
                                 },
                                 "name": "sso-probe-netrc-volume"
-                    },
-                    {
-                        "configMap": {
-                            "defaultMode": 420,
-                            "items": [
-                                {
-                                    "key": "actions.cli",
-                                    "path": "actions.cli"
-                                }
-                            ],
-                            "name": "actions-cli-cm"
-                        },
-                        "name": "actions-cli-cm"
+                            },
+                            {
+                                "configMap": {
+                                    "defaultMode": 420,
+                                    "items": [
+                                        {
+                                            "key": "actions.cli",
+                                            "path": "actions.cli"
+                                        }
+                                    ],
+                                    "name": "actions-cli-cm"
+                                },
+                                "name": "actions-cli-cm"
+                            },
+                            {
+                                "configMap": {
+                                    "defaultMode": 420,
+                                    "items": [
+                                        {
+                                            "key": "messages_pl.properties",
+                                            "path": "messages_pl.properties"
+                                        }
+                                    ],
+                                    "name": "logging-messages-pl-cm"
+                                },
+                                "name": "logging-messages-pl-cm"
                             }
                         ]
                     }
