@@ -1,0 +1,13 @@
+{
+    "apiVersion": "v1",
+    "data": {
+        "messages_pl.properties": "loginAccountTitle=Zaloguj się na swoje konto\nusernameOrEmail=Nazwa użytkownika\npassword=Hasło"
+    },
+    "kind": "ConfigMap",
+    "metadata": {
+        "labels": {
+            "application": "sso"
+        },
+        "name": "logging-messages-pl-cm"
+    }
+}
