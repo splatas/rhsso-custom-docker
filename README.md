@@ -139,6 +139,15 @@ C) Mount the Configmap 'actions-cli-cm' as a volume:
   $ oc set volume dc/sso --add --name=actions-cli-cm --mount-path /opt/eap/extensions/actions.cli --sub-path actions.cli --source='{"configMap":{"name":"actions-cli-cm","items":[{"key":"actions.cli","path":"actions.cli"}]}}' -n $SSO_PROJECT
   ```
 
+
+  C.1) Mount the Configmap 'logging-messages-pl-cm' as a volume:
+
+  ###  NOT NECESARY: INCLUDED IN CUSTOM TEMPLATE
+
+  ```
+  $ oc set volume dc/sso --add --name=logging-messages-pl-cm --mount-path /opt/eap/themes/mytheme/login/messages/messages_pl.properties --sub-path messages_pl.properties --source='{"configMap":{"name":"logging-messages-pl-cm","items":[{"key":"messages_pl.properties","path":"messages_pl.properties"}]}}' -n $SSO_PROJECT
+  ```
+
 D) Update 'initialDelaySeconds' in livenessProbe in order to have more time on first deployment: from 60 to 600 seconds.
 
   ###  NOT NECESARY: INCLUDED IN CUSTOM TEMPLATE
@@ -146,9 +155,9 @@ D) Update 'initialDelaySeconds' in livenessProbe in order to have more time on f
   $ oc patch dc/sso -p '{"spec":{"template": {"spec": {"containers":[{"name": "sso","livenessProbe": {"initialDelaySeconds":'600'}}]}}}}' -n ${SSO_PROJECT}
   ```
 
-E) Actualizo la IMAGEN BASE a utilizar durante el despliegue.
+E) Update the BASE IMAGE.
 
-  ###  NOT NECESARY: INCLUDED IN CUSTOM TEMPLATE --
+  ###  NOT NECESARY: INCLUDED IN CUSTOM TEMPLATE 
   The original template shows "namespace": "openshift" and ImageStreamTag "name": "sso76-openshift-rhel8:7.6-24".
   ```
   $ oc patch dc/sso -p '{"spec": {
@@ -171,7 +180,6 @@ E) Actualizo la IMAGEN BASE a utilizar durante el despliegue.
     }
     }' -n $SSO_PROJECT
   ```
-
 
 F) If deployment is not triggered automatically, launch it manually:
 ```
