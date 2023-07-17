@@ -1,0 +1,341 @@
+{
+    "apiVersion": "apps.openshift.io/v1",
+    "kind": "DeploymentConfig",
+    "metadata": {
+        "annotations": {
+            "openshift.io/generated-by": "OpenShiftNewApp"
+        },
+        "creationTimestamp": "2023-07-14T14:26:12Z",
+        "generation": 14,
+        "labels": {
+            "app": "sso76-ocp4-x509-https-custom",
+            "app.kubernetes.io/component": "sso76-ocp4-x509-https-custom",
+            "app.kubernetes.io/instance": "sso76-ocp4-x509-https-custom",
+            "application": "sso",
+            "rhsso": "7.6.2.GA",
+            "template": "sso76-ocp4-x509-https-custom"
+        },
+        "name": "sso",
+        "namespace": "rhn-gps-splatas-dev",
+        "resourceVersion": "2679553832",
+        "uid": "3c6791ee-d255-4b2a-bac7-b60ac063dc2e"
+    },
+    "spec": {
+        "replicas": 1,
+        "revisionHistoryLimit": 10,
+        "selector": {
+            "deploymentConfig": "sso"
+        },
+        "strategy": {
+            "activeDeadlineSeconds": 21600,
+            "recreateParams": {
+                "timeoutSeconds": 600
+            },
+            "resources": {},
+            "type": "Recreate"
+        },
+        "template": {
+            "metadata": {
+                "annotations": {
+                    "openshift.io/generated-by": "OpenShiftNewApp"
+                },
+                "creationTimestamp": null,
+                "labels": {
+                    "application": "sso",
+                    "deploymentConfig": "sso"
+                },
+                "name": "sso"
+            },
+            "spec": {
+                "containers": [
+                    {
+                        "env": [
+                            {
+                                "name": "SSO_HOSTNAME"
+                            },
+                            {
+                                "name": "DB_MIN_POOL_SIZE"
+                            },
+                            {
+                                "name": "DB_MAX_POOL_SIZE"
+                            },
+                            {
+                                "name": "DB_TX_ISOLATION"
+                            },
+                            {
+                                "name": "JGROUPS_PING_PROTOCOL",
+                                "value": "openshift.DNS_PING"
+                            },
+                            {
+                                "name": "OPENSHIFT_DNS_PING_SERVICE_NAME",
+                                "value": "sso-ping"
+                            },
+                            {
+                                "name": "OPENSHIFT_DNS_PING_SERVICE_PORT",
+                                "value": "8888"
+                            },
+                            {
+                                "name": "X509_CA_BUNDLE",
+                                "value": "/var/run/configmaps/service-ca/service-ca.crt /var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
+                            },
+                            {
+                                "name": "JGROUPS_CLUSTER_PASSWORD",
+                                "value": "lN1J2VJAtabyRPWSFQWyioTm34Myh3Lc"
+                            },
+                            {
+                                "name": "SSO_ADMIN_USERNAME",
+                                "value": "admin"
+                            },
+                            {
+                                "name": "SSO_ADMIN_PASSWORD",
+                                "value": "redhat01"
+                            },
+                            {
+                                "name": "SSO_REALM"
+                            },
+                            {
+                                "name": "SSO_SERVICE_USERNAME"
+                            },
+                            {
+                                "name": "SSO_SERVICE_PASSWORD"
+                            },
+                            {
+                                "name": "DB_JDBC_URL",
+                                "valueFrom": {
+                                    "configMapKeyRef": {
+                                        "key": "DB_JDBC_URL",
+                                        "name": "sso-database-cm"
+                                    }
+                                }
+                            },
+                            {
+                                "name": "DB_USERNAME",
+                                "valueFrom": {
+                                    "secretKeyRef": {
+                                        "key": "DB_USERNAME",
+                                        "name": "sso-database-secret"
+                                    }
+                                }
+                            },
+                            {
+                                "name": "DB_PASSWORD",
+                                "valueFrom": {
+                                    "secretKeyRef": {
+                                        "key": "DB_PASSWORD",
+                                        "name": "sso-database-secret"
+                                    }
+                                }
+                            }
+                        ],
+                        "image": "image-registry.openshift-image-registry.svc:5000/rhn-gps-splatas-dev/rhsso@sha256:8c5eff90e65ce09ababe638449c8ef741aa82d1d8ff09905166e9d341c91cb31",
+                        "imagePullPolicy": "Always",
+                        "livenessProbe": {
+                            "exec": {
+                                "command": [
+                                    "/bin/bash",
+                                    "-c",
+                                    "/opt/eap/bin/livenessProbe.sh"
+                                ]
+                            },
+                            "failureThreshold": 3,
+                            "initialDelaySeconds": 360,
+                            "periodSeconds": 10,
+                            "successThreshold": 1,
+                            "timeoutSeconds": 3
+                        },
+                        "name": "sso",
+                        "ports": [
+                            {
+                                "containerPort": 8778,
+                                "name": "jolokia",
+                                "protocol": "TCP"
+                            },
+                            {
+                                "containerPort": 8080,
+                                "name": "http",
+                                "protocol": "TCP"
+                            },
+                            {
+                                "containerPort": 8443,
+                                "name": "https",
+                                "protocol": "TCP"
+                            },
+                            {
+                                "containerPort": 8888,
+                                "name": "ping",
+                                "protocol": "TCP"
+                            }
+                        ],
+                        "readinessProbe": {
+                            "exec": {
+                                "command": [
+                                    "/bin/bash",
+                                    "-c",
+                                    "/opt/eap/bin/readinessProbe.sh"
+                                ]
+                            },
+                            "failureThreshold": 3,
+                            "initialDelaySeconds": 10,
+                            "periodSeconds": 10,
+                            "successThreshold": 1,
+                            "timeoutSeconds": 3
+                        },
+                        "resources": {
+                            "limits": {
+                                "memory": "1Gi"
+                            }
+                        },
+                        "terminationMessagePath": "/dev/termination-log",
+                        "terminationMessagePolicy": "File",
+                        "volumeMounts": [
+                            {
+                                "mountPath": "/etc/x509/https",
+                                "name": "sso-x509-https-volume",
+                                "readOnly": true
+                            },
+                            {
+                                "mountPath": "/etc/x509/jgroups",
+                                "name": "sso-x509-jgroups-volume",
+                                "readOnly": true
+                            },
+                            {
+                                "mountPath": "/var/run/configmaps/service-ca",
+                                "name": "service-ca",
+                                "readOnly": true
+                            },
+                            {
+                                "mountPath": "/mnt/rh-sso",
+                                "name": "sso-probe-netrc-volume"
+                            },
+                            {
+                                "mountPath": "/opt/eap/extensions/actions.cli",
+                                "name": "actions-cli-cm",
+                                "subPath": "actions.cli"
+                            },
+                            {
+                                "mountPath": "/opt/eap/themes/mytheme/login/messages/messages_pl.properties",
+                                "name": "logging-messages-pl-cm",
+                                "subPath": "messages_pl.properties"
+                            }
+                        ]
+                    }
+                ],
+                "dnsPolicy": "ClusterFirst",
+                "restartPolicy": "Always",
+                "schedulerName": "default-scheduler",
+                "securityContext": {},
+                "terminationGracePeriodSeconds": 75,
+                "volumes": [
+                    {
+                        "name": "sso-x509-https-volume",
+                        "secret": {
+                            "defaultMode": 420,
+                            "secretName": "sso-x509-https-secret"
+                        }
+                    },
+                    {
+                        "name": "sso-x509-jgroups-volume",
+                        "secret": {
+                            "defaultMode": 420,
+                            "secretName": "sso-x509-jgroups-secret"
+                        }
+                    },
+                    {
+                        "configMap": {
+                            "defaultMode": 420,
+                            "name": "sso-service-ca"
+                        },
+                        "name": "service-ca"
+                    },
+                    {
+                        "emptyDir": {
+                            "medium": "Memory"
+                        },
+                        "name": "sso-probe-netrc-volume"
+                    },
+                    {
+                        "configMap": {
+                            "defaultMode": 420,
+                            "items": [
+                                {
+                                    "key": "actions.cli",
+                                    "path": "actions.cli"
+                                }
+                            ],
+                            "name": "actions-cli-cm"
+                        },
+                        "name": "actions-cli-cm"
+                    },
+                    {
+                        "configMap": {
+                            "defaultMode": 420,
+                            "items": [
+                                {
+                                    "key": "messages_pl.properties",
+                                    "path": "messages_pl.properties"
+                                }
+                            ],
+                            "name": "logging-messages-pl-cm"
+                        },
+                        "name": "logging-messages-pl-cm"
+                    }
+                ]
+            }
+        },
+        "test": false,
+        "triggers": [
+            {
+                "imageChangeParams": {
+                    "automatic": true,
+                    "containerNames": [
+                        "sso"
+                    ],
+                    "from": {
+                        "kind": "ImageStreamTag",
+                        "name": "rhsso:latest",
+                        "namespace": "rhn-gps-splatas-dev"
+                    },
+                    "lastTriggeredImage": "image-registry.openshift-image-registry.svc:5000/rhn-gps-splatas-dev/rhsso@sha256:8c5eff90e65ce09ababe638449c8ef741aa82d1d8ff09905166e9d341c91cb31"
+                },
+                "type": "ImageChange"
+            },
+            {
+                "type": "ConfigChange"
+            }
+        ]
+    },
+    "status": {
+        "availableReplicas": 1,
+        "conditions": [
+            {
+                "lastTransitionTime": "2023-07-17T19:00:24Z",
+                "lastUpdateTime": "2023-07-17T19:01:49Z",
+                "message": "replication controller \"sso-11\" successfully rolled out",
+                "reason": "NewReplicationControllerAvailable",
+                "status": "True",
+                "type": "Progressing"
+            },
+            {
+                "lastTransitionTime": "2023-07-17T19:07:18Z",
+                "lastUpdateTime": "2023-07-17T19:07:18Z",
+                "message": "Deployment config has minimum availability.",
+                "status": "True",
+                "type": "Available"
+            }
+        ],
+        "details": {
+            "causes": [
+                {
+                    "type": "ConfigChange"
+                }
+            ],
+            "message": "config change"
+        },
+        "latestVersion": 11,
+        "observedGeneration": 14,
+        "readyReplicas": 1,
+        "replicas": 1,
+        "unavailableReplicas": 0,
+        "updatedReplicas": 1
+    }
+}
