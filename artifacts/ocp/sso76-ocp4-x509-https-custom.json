@@ -360,11 +360,11 @@
                                         "mountPath": "/mnt/rh-sso",
                                         "name": "sso-probe-netrc-volume",
                                         "readOnly": false
-                            },
-                            {
-                                "mountPath": "/opt/eap/extensions/actions.cli",
-                                "name": "actions-cli-cm",
-                                "subPath": "actions.cli"
+                                    },
+                                    {
+                                        "mountPath": "/opt/eap/extensions/actions.cli",
+                                        "name": "actions-cli-cm",
+                                        "subPath": "actions.cli"
                                     }
                                 ]
                             }
