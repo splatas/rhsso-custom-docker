@@ -1,8 +1,40 @@
 apiVersion: v1
 data:
-  actions.cli: ""
+  actions.cli: "
+    embed-server --std-out=echo --server-config=standalone-openshift.xml
+
+    batch
+
+    set DB_USERNAME=$DB_USERNAME
+    set DB_PASSWORD=$DB_PASSWORD
+    set DB_JDBC_URL=$DB_JDBC_URL
+    set DB_DRIVER_NAME=$DRIVER_NAME
+    set DB_DRIVER=oracle.jdbc.OracleDriver
+    set DB_XA_DRIVER=oracle.jdbc.xa.client.OracleXADataSource
+    set DB_EAP_MODULE=com.oracle
+    set FILE=/opt/eap/extensions/ojdbc8-12.2.0.1.0.jar
+
+    module add --name=com.oracle --resources=/opt/eap/extensions/ojdbc8-12.2.0.1.0.jar --dependencies=javax.api,javax.resource.api
+
+    /subsystem=datasources/jdbc-driver=oracle:add( \
+        driver-name=oracle, \
+        driver-module-name=com.oracle, \
+        driver-xa-datasource-class-name=oracle.jdbc.xa.client.OracleXADataSource \
+    )
+
+    /subsystem=datasources/data-source=KeycloakDS:remove()
+
+    /subsystem=datasources/data-source=KeycloakDS:add( \
+        jndi-name=java:jboss/datasources/KeycloakDS, \
+        enabled=true, \
+        use-java-context=true, \
+        connection-url=jdbc:oracle:thin:@10.170.95.243:1521/PWIPRE, \
+        driver-name=oracle, \
+        user-name=sys, \
+        password=tstkZxSHIDpMqVSv \
+    )"
 kind: ConfigMap
 metadata:
   labels:
     application: sso
-  name: logging-messages-pl-cm
+  name: actions-cli-cm

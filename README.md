@@ -190,3 +190,25 @@ G) Change number of replicas
 ```
 $ oc scale --replicas=0 dc/sso
 ```
+
+
+
+
+/subsystem=datasources/jdbc-driver=oracle:add( \
+    driver-name=oracle, \
+    driver-module-name=com.oracle, \
+    driver-xa-datasource-class-name=oracle.jdbc.xa.client.OracleXADataSource \
+)
+
+/subsystem=datasources/data-source=KeycloakDS:remove()
+
+ 
+/subsystem=datasources/data-source=KeycloakDS:add( \
+    jndi-name=java:jboss/datasources/KeycloakDS, \
+    enabled=true, \
+    use-java-context=true, \
+    connection-url=jdbc:oracle:thin:@10.170.95.243:1521/PWIPRE, \
+    driver-name=oracle, \
+    user-name=sys, \
+    password=tstkZxSHIDpMqVSv \
+)
