@@ -1,6 +1,6 @@
-# Red Hat Single Sign-On
+# Red Hat Single Sign-On in Openshift 
 
-This excerpt covers the installation process of the **Red Hat Single SignOn 7.6** product and its necessary configurations.
+This excerpt covers the installation process of the **Red Hat Single SignOn 7.6 in an Openshift platform** and its necessary configurations.
 The RH-SSO instance will be connected to an external Oracle 19C Database. For that reason we need to install and configure the proper oracle driver.
 
 
