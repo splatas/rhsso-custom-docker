@@ -43,8 +43,7 @@ $ cd rhsso-custom-docker
         - Reference to custom Image: 'rhsso:latest'
 
 ```
-$ oc create -f ./artifacts/ocp/sso76-ocp4-x509-https-custom.json \
-    -n openshift
+$ oc create -f ./artifacts/ocp/sso76-ocp4-x509-https-custom_sqlserver.json -n openshift
 ```
 
   ##### NEXT COMMAND IS NOT NECESARY: Original RH-SSO 7.6  Template (only for reference) 
@@ -94,10 +93,12 @@ Custom values will be inyected using the ConfigMap(DB_JDBC_URL) and Secret(DB_US
 ## 6. Create a SSO instance with the previous template. We should define User admin (and Password) to manage the RH-SSO instance.
 
 Params:
+  SSO_ADMIN_USERNAME = Admin user for RH-SSO instance
+  SSO_ADMIN_PASSWORD = Admin password
   IMAGE_STREAM_NAMESPACE = Namespace where custom image will be persisted (current namespace?)
 
   ```
-  $ oc new-app --template=sso76-ocp4-x509-https-custom \
+  $ oc new-app --template=sso76-ocp4-x509-https-custom_sqlserver \
           --param=SSO_ADMIN_USERNAME=admin \
           --param=SSO_ADMIN_PASSWORD="redhat01" \
           --param=IMAGE_STREAM_NAMESPACE=rhn-gps-splatas-dev
