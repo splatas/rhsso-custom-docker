@@ -98,7 +98,7 @@ Params:
   IMAGE_STREAM_NAMESPACE = Namespace where custom image will be persisted (current namespace?)
 
   ```
-  $ oc new-app --template=sso76-ocp4-x509-https-custom_sqlserver \
+  $ oc new-app --template=sso76-ocp4-x509-https-custom-sqlserver \
           --param=SSO_ADMIN_USERNAME=admin \
           --param=SSO_ADMIN_PASSWORD="redhat01" \
           --param=IMAGE_STREAM_NAMESPACE=rhn-gps-splatas-dev

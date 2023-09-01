@@ -7,5 +7,3 @@ RUN chmod 774 -R /opt/eap/
 USER jboss
 
 CMD ["/opt/eap/bin/openshift-launch.sh"]
-
-
