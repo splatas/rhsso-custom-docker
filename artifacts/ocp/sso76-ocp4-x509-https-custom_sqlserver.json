@@ -3,7 +3,7 @@
     "kind": "Template",
     "labels": {
         "rhsso": "7.6.2.GA",
-        "template": "sso76-ocp4-x509-https-custom"
+        "template": "sso76-ocp4-x509-https-custom-sqlserver"
     },
     "message": "A new RH-SSO service has been created in your project. The admin username/password for accessing the master realm via the RH-SSO console is ${SSO_ADMIN_USERNAME}/${SSO_ADMIN_PASSWORD}. The HTTPS keystore used for serving secure content, the JGroups keystore used for securing JGroups communications, and server truststore used for securing RH-SSO requests were automatically created via OpenShift's service serving x509 certificate secrets by using a CA bundle that is automatically injected into any configMap annotated with 'service.beta.openshift.io/inject-cabundle=true' annotation. Refer to: https://github.com/openshift/openshift-docs/blob/enterprise-4.1/release_notes/ocp-4-1-release-notes.adoc#service-ca-bundle-changes for additional details about this CA bundle.",
     "metadata": {
@@ -23,7 +23,7 @@
         "labels": {
             "samples.operator.openshift.io/managed": "true"
         },
-        "name": "sso76-ocp4-x509-https-custom",
+        "name": "sso76-ocp4-x509-https-custom-sqlserver",
         
         "resourceVersion": "2536463082",
         "uid": "c98bc6d7-cef9-4d23-804c-3ad0569ae053"
