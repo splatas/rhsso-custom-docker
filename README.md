@@ -104,6 +104,9 @@ Params:
           --param=IMAGE_STREAM_NAMESPACE=rhn-gps-splatas-dev
   ```
 
+After a few minutes you should see RH-SSO running:
+
+![RH-SSO Running](./images/rhsso-running.png)
 
 ---
 
