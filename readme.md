@@ -28,11 +28,17 @@ $ oc create -f ./artifacts/ocp/mtls-endpoints-aliases-cm.yaml
 4) Creamos el BuildConfig:
 ```
 $ oc new-build --name rhsso --binary --strategy docker
+
+    Para un BC diferente con tzdata actualizado:
+      oc new-build --name rhsso-tz-data --binary --strategy docker
 ```
 
 5) Buildeamos la imagen con el BC anterior y el contenido de la carpeta actual:
 ```
 $ oc start-build rhsso --from-dir . --follow
+
+    Para buildear con el package tzdata
+      oc start-build rhsso-tz-data --from-dir . --follow
 ```
 
 ### NOTA: 
